@@ -1,5 +1,6 @@
 package com.jambit.testdocker.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,11 +22,25 @@ public class UniversityEntity {
     @Column(name = "id")
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "uniPersonEntity_id")
-    Set<UniPersonEntity> uniPersonEntitySet;
+//    @OneToMany(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "uniPersonEntity_id")
+//    Set<UniPersonEntity> uniPersonEntitySet;
 
-    @OneToOne()
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    @Column(name = "university_name")
+    private String name;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "address_id")
     AddressEntity address;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            mappedBy = "universities")
+    @JsonIgnore
+    private Set<PersonEntity> persons;
+
 }
