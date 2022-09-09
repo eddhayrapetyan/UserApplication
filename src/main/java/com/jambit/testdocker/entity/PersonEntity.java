@@ -20,6 +20,16 @@ public class PersonEntity {
     @Column(name = "id")
     private Long id;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    private String name;
+
     @Transient
     private Integer age;
 
@@ -35,38 +45,58 @@ public class PersonEntity {
 
     private String faculty;
 
-//    @OneToMany(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "uniPersonEntity_id")
-//    Set<UniPersonEntity> uniPersonEntitySet;
-
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.PERSIST,
                     CascadeType.MERGE
             })
     @JoinTable(name = "person_university",
-            joinColumns = {@JoinColumn(name = "person_id")},
-            inverseJoinColumns = {@JoinColumn(name = "university_id")}
-    )
+            joinColumns = @JoinColumn(name = "person_id"),
+            inverseJoinColumns = @JoinColumn(name = "university_id"))
     private Set<UniversityEntity> universities = new HashSet<>();
+
+    public Set<UniversityEntity> getUniversities() {
+        return universities;
+    }
+
+    public void setUniversities(Set<UniversityEntity> universities) {
+        this.universities = universities;
+    }
 
     public void addUniversity(UniversityEntity university) {
         this.universities.add(university);
         university.getPersons().add(this);
     }
 
-    public void removeUniversity(long universityId) {
-        UniversityEntity university = this.universities
-                .stream()
-                .filter(uni -> uni.getId() == universityId)
-                .findFirst()
-                .orElse(null);
+    public void removeUniversity(UniversityEntity university) {
+        this.universities.remove(university);
+        university.getPersons().remove(this);
+    }
 
-        if(university != null){
-            this.universities.remove(university);
-            university.getPersons().remove(this);
+    public void removeAllUniversities() {
+        for (var uni : new HashSet<>(universities)) {
+            removeUniversity(uni);
         }
     }
+
+
+//    public void addUniversity(UniversityEntity university) {
+//        this.universities.add(university);
+//        university.getPersons().add(this);
+//    }
+//
+//    public void removeUniversity(long universityId) {
+//        UniversityEntity university = this.universities
+//                .stream()
+//                .filter(uni -> uni.getId() == universityId)
+//                .findFirst()
+//                .orElse(null);
+//
+//        if(university != null){
+//            this.universities.remove(university);
+//            university.getPersons().remove(this);
+//        }
+//    }
 
     public Long getId() {
         return id;

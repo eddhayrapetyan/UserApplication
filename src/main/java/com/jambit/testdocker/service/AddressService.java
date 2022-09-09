@@ -1,2 +1,4 @@
-package com.jambit.testdocker.service;public class AddressService {
+package com.jambit.testdocker.service;
+
+public class AddressService {
 }
