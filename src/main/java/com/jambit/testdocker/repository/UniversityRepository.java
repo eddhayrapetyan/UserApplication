@@ -10,13 +10,16 @@ import java.util.List;
 @Repository
 public interface UniversityRepository extends JpaRepository<UniversityEntity, Long> {
 
-//    List<UniversityEntity> findUniversityEntitiesByPersonsId(Long personId);
+    List<UniversityEntity> findUniversityEntitiesByPersonsId(Long personId);
+
+    List<UniversityEntity> findUniversityEntitiesByPersons(Long personId);
 
     UniversityEntity findByName(String name);
 
     @Transactional
     void deleteById(long id);
 
+    //fixme not working properly
 //    @Transactional
 //    void deleteByPersonId(long id);
 

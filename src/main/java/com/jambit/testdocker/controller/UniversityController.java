@@ -1,6 +1,8 @@
 package com.jambit.testdocker.controller;
 
+import com.jambit.testdocker.dto.UniversityDto;
 import com.jambit.testdocker.entity.UniversityEntity;
+import com.jambit.testdocker.exception.PersonNotFoundException;
 import com.jambit.testdocker.exception.UniversityAlreadyExistsException;
 import com.jambit.testdocker.exception.UniversityNotFoundException;
 import com.jambit.testdocker.service.UniversityService;
@@ -18,8 +20,8 @@ public class UniversityController {
     private final UniversityService universityService;
 
     @GetMapping("universities")
-    public ResponseEntity<List<UniversityEntity>> getAllUniversities() {
-        List<UniversityEntity> universities = universityService.getAllUniversities();
+    public ResponseEntity<List<UniversityDto>> getAllUniversities() {
+        List<UniversityDto> universities = universityService.getAllUniversities();
 
         if (universities.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -29,7 +31,7 @@ public class UniversityController {
     }
 
     @PostMapping("universities/register")
-    public ResponseEntity<String> registerUniversity(@RequestBody UniversityEntity university) {
+    public ResponseEntity<String> registerUniversity(@RequestBody UniversityDto university) {
         try {
             universityService.insertUniversity(university);
 
@@ -41,16 +43,16 @@ public class UniversityController {
         }
     }
 
-//    @GetMapping("/persons/{person_id}/universities")
-//    public ResponseEntity<List<UniversityEntity>> getUniversitiesByPersonId(
-//            @PathVariable(value = "person_id") Long personId) {
-//        try {
-//            List<UniversityEntity> universitiesByPersonId = universityService.getUniversitiesByPersonId(personId);
-//            return new ResponseEntity<>(universitiesByPersonId, HttpStatus.OK);
-//        } catch (PersonNotFoundException e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
+    @GetMapping("/persons/{person_id}/universities")
+    public ResponseEntity<List<UniversityEntity>> getUniversitiesByPersonId(
+            @PathVariable(value = "person_id") Long personId) {
+        try {
+            List<UniversityEntity> universitiesByPersonId = universityService.getUniversitiesByPersonId(personId);
+            return new ResponseEntity<>(universitiesByPersonId, HttpStatus.OK);
+        } catch (PersonNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @GetMapping("universities/{id}")
     public ResponseEntity<UniversityEntity> getUniversityById(@PathVariable long id) {
@@ -64,4 +66,30 @@ public class UniversityController {
         }
     }
 
+    @PatchMapping("universities/{id}")
+    public ResponseEntity<UniversityDto> updateUniversityById(@PathVariable("id") long id,
+                                                              @RequestBody UniversityDto universityDto) {
+        try {
+            universityService.updateUniversity(id, universityDto);
+
+            return new ResponseEntity<>(universityDto, HttpStatus.OK);
+        } catch (UniversityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @DeleteMapping("/universities/{id}")
+    public ResponseEntity<HttpStatus> deleteUniversityById(@PathVariable("id") long id) {
+        try {
+            universityService.deleteUniversityById(id);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (UniversityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
 }

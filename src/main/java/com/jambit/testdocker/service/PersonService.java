@@ -27,10 +27,14 @@ public class PersonService {
     @Resource
     private final UniversityRepository universityRepository;
 
-    public PersonDto addPerson(PersonDto personDto) {
-        PersonEntity person = new PersonEntity();
-        mapDtoToEntity(personDto, person);
-        PersonEntity savedPerson = personRepository.save(person);
+    public PersonDto insertPerson(PersonDto personDto) throws PersonAlreadyExistException {
+        PersonEntity personEntity = new PersonEntity();
+        mapDtoToEntity(personDto, personEntity);
+        if (personRepository.findByUsername(personEntity.getUsername()) != null) {
+            throw new PersonAlreadyExistException("Person with given Id already exists!");
+        }
+
+        PersonEntity savedPerson = personRepository.save(personEntity);
         return mapEntityToDto(savedPerson);
     }
 
@@ -49,7 +53,7 @@ public class PersonService {
     @Transactional
     public PersonDto updatePerson(long id, PersonDto personDto) throws PersonNotFoundException {
         PersonEntity personEntity = personRepository.findById(id)
-                .orElseThrow(() -> new PersonNotFoundException("Person with id: " + id + " noy found"));
+                .orElseThrow(() -> new PersonNotFoundException("Person with id: " + id + " not found"));
 
         personEntity.getUniversities().clear();
         mapDtoToEntity(personDto, personEntity);
@@ -59,7 +63,7 @@ public class PersonService {
         return mapEntityToDto(person);
     }
 
-    public String deletePerson(long id) throws PersonNotFoundException {
+    public String deletePersonById(long id) throws PersonNotFoundException {
         Optional<PersonEntity> personById = Optional.ofNullable(personRepository.findById(id)
                 .orElseThrow(() -> new PersonNotFoundException("Person with id: " + id + " noy found")));
         if (personById.isPresent()) {
@@ -71,19 +75,8 @@ public class PersonService {
         return null;
     }
 
-    public PersonEntity insertPerson(PersonEntity personEntity) throws PersonAlreadyExistException {
-        if (personRepository.findByUsername(personEntity.getUsername()) != null) {
-            throw new PersonAlreadyExistException("Person with given Id already exists!");
-        }
-        return personRepository.save(personEntity);
-    }
-
-    public List<PersonEntity> findAllPersons() {
-        return personRepository.findAll();
-    }
-
-    public List<PersonEntity> getAllPersonsListByUsername(String username) {
-        return personRepository.findByUsernameContaining(username);
+    public List<PersonDto> getAllPersonsListByUsername(String name) {
+        return personRepository.findByFirstNameContaining(name);
     }
 
     public PersonEntity getPersonById(Long id) throws PersonNotFoundException {
@@ -95,28 +88,9 @@ public class PersonService {
         return personRepository.findPersonEntitiesByUniversitiesId(id);
     }
 
-    public PersonEntity updatePersonById(Long id, PersonEntity person) throws PersonNotFoundException {
-        var personById = personRepository.findById(id)
-                .orElseThrow(() -> new PersonNotFoundException("Person with id : " + id + " not found"));
-
-        personById.setAge(person.getAge());
-        personById.setBirthDate(person.getBirthDate());
-        personById.setGender(person.getGender());
-        personById.setFaculty(person.getFaculty());
-
-        return personRepository.save(personById);
-    }
-
-    public void deletePersonById(long id) throws PersonNotFoundException {
-        if (personRepository.existsById(id)) {
-            personRepository.deleteById(id);
-        } else {
-            throw new PersonNotFoundException("Person with id : " + id + " not found");
-        }
-    }
-
     private void mapDtoToEntity(PersonDto personDto, PersonEntity personEntity) {
-        personEntity.setName(personDto.getName());
+        personEntity.setFirstName(personDto.getFirstName());
+        personEntity.setLastName(personDto.getFirstName());
         personEntity.setUsername(personDto.getUsername());
         personEntity.setPassword(personDto.getPassword());
         personEntity.setFaculty(personDto.getFaculty());
@@ -135,22 +109,22 @@ public class PersonService {
     }
 
     private PersonDto mapEntityToDto(PersonEntity personEntity) {
-        PersonDto responseDto = new PersonDto();
+        PersonDto personDto = new PersonDto();
 
-        responseDto.setName(personEntity.getName());
-        responseDto.setUsername(personEntity.getUsername());
-        responseDto.setPassword(personEntity.getPassword());
-        responseDto.setFaculty(personEntity.getFaculty());
-        responseDto.setBirthDate(personEntity.getBirthDate());
-        responseDto.setAge(personEntity.getAge());
-        responseDto.setGender(personEntity.getGender());
+        personDto.setFirstName(personEntity.getFirstName());
+        personDto.setLastName(personEntity.getLastName());
+        personDto.setUsername(personEntity.getUsername());
+        personDto.setPassword(personEntity.getPassword());
+        personDto.setFaculty(personEntity.getFaculty());
+        personDto.setBirthDate(personEntity.getBirthDate());
+        personDto.setAge(personEntity.getAge());
+        personDto.setGender(personEntity.getGender());
 
-        responseDto.setUniversities(personEntity.getUniversities()
+        personDto.setUniversities(personEntity.getUniversities()
                 .stream().map(UniversityEntity::getName)
                 .collect(Collectors.toSet()));
 
-        return responseDto;
+        return personDto;
     }
-
 
 }

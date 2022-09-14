@@ -14,7 +14,9 @@ import java.util.Set;
 public class PersonDto {
     private Long id;
 
-    private String name;
+    private String firstName;
+
+    private String lastName;
 
     private Integer age;
 

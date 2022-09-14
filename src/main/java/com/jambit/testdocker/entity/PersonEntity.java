@@ -1,10 +1,6 @@
 package com.jambit.testdocker.entity;
 
 import com.jambit.testdocker.entity.enums.Gender;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -20,15 +16,9 @@ public class PersonEntity {
     @Column(name = "id")
     private Long id;
 
-    public String getName() {
-        return name;
-    }
+    private String firstName;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    private String name;
+    private String lastName;
 
     @Transient
     private Integer age;
@@ -79,31 +69,28 @@ public class PersonEntity {
         }
     }
 
-
-//    public void addUniversity(UniversityEntity university) {
-//        this.universities.add(university);
-//        university.getPersons().add(this);
-//    }
-//
-//    public void removeUniversity(long universityId) {
-//        UniversityEntity university = this.universities
-//                .stream()
-//                .filter(uni -> uni.getId() == universityId)
-//                .findFirst()
-//                .orElse(null);
-//
-//        if(university != null){
-//            this.universities.remove(university);
-//            university.getPersons().remove(this);
-//        }
-//    }
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Integer getAge() {

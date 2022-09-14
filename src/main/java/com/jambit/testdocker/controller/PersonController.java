@@ -1,5 +1,6 @@
 package com.jambit.testdocker.controller;
 
+import com.jambit.testdocker.dto.PersonDto;
 import com.jambit.testdocker.entity.PersonEntity;
 import com.jambit.testdocker.exception.PersonAlreadyExistException;
 import com.jambit.testdocker.exception.PersonNotFoundException;
@@ -18,7 +19,8 @@ public class PersonController {
     private final PersonService personService;
 
     @PostMapping("/persons/register")
-    public ResponseEntity<String> registerPerson(@RequestBody PersonEntity entity) {
+    public ResponseEntity<String> registerPerson(@RequestBody PersonDto entity) {
+
         try {
             personService.insertPerson(entity);
             return ResponseEntity.ok("Person successfully inserted");
@@ -30,12 +32,12 @@ public class PersonController {
     }
 
     @GetMapping("/persons")
-    public ResponseEntity<List<PersonEntity>> getAllPersons(@RequestParam(required = false) String username) {
-        List<PersonEntity> persons;
-        if (username == null) {
-            persons = personService.findAllPersons();
+    public ResponseEntity<List<PersonDto>> getAllPersons(@RequestParam(required = false) String name) {
+        List<PersonDto> persons;
+        if (name == null) {
+            persons = personService.getAllPersons();
         } else {
-            persons = personService.getAllPersonsListByUsername(username);
+            persons = personService.getAllPersonsListByUsername(name);
         }
 
         if (persons.isEmpty()) {
@@ -67,10 +69,10 @@ public class PersonController {
     }
 
     @PatchMapping("/persons/{id}")
-    public ResponseEntity<PersonEntity> updatePersonById(@PathVariable("id") long id,
-                                                         @RequestBody PersonEntity person) {
+    public ResponseEntity<PersonDto> updatePersonById(@PathVariable("id") long id,
+                                                      @RequestBody PersonDto person) {
         try {
-            personService.updatePersonById(id, person);
+            personService.updatePerson(id, person);
             return ResponseEntity.ok(person);
         } catch (PersonNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
