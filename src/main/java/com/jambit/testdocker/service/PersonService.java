@@ -5,6 +5,7 @@ import com.jambit.testdocker.entity.PersonEntity;
 import com.jambit.testdocker.entity.UniversityEntity;
 import com.jambit.testdocker.exception.PersonAlreadyExistException;
 import com.jambit.testdocker.exception.PersonNotFoundException;
+import com.jambit.testdocker.mapper.PersonMapper;
 import com.jambit.testdocker.repository.PersonRepository;
 import com.jambit.testdocker.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,18 +25,17 @@ public class PersonService {
     @Resource
     private final PersonRepository personRepository;
 
-    @Resource
-    private final UniversityRepository universityRepository;
+    private final PersonMapper personMapper;
 
     public PersonDto insertPerson(PersonDto personDto) throws PersonAlreadyExistException {
         PersonEntity personEntity = new PersonEntity();
-        mapDtoToEntity(personDto, personEntity);
+        personMapper.mapDtoToEntity(personDto, personEntity);
         if (personRepository.findByUsername(personEntity.getUsername()) != null) {
             throw new PersonAlreadyExistException("Person with given Id already exists!");
         }
 
         PersonEntity savedPerson = personRepository.save(personEntity);
-        return mapEntityToDto(savedPerson);
+        return personMapper.mapEntityToDto(savedPerson);
     }
 
     public List<PersonDto> getAllPersons() {
@@ -43,7 +43,7 @@ public class PersonService {
         List<PersonEntity> personEntityList = personRepository.findAll();
 
         personEntityList.forEach(person -> {
-            PersonDto personDto = mapEntityToDto(person);
+            PersonDto personDto = personMapper.mapEntityToDto(person);
             personDtoList.add(personDto);
         });
 
@@ -56,11 +56,11 @@ public class PersonService {
                 .orElseThrow(() -> new PersonNotFoundException("Person with id: " + id + " not found"));
 
         personEntity.getUniversities().clear();
-        mapDtoToEntity(personDto, personEntity);
+        personMapper.mapDtoToEntity(personDto, personEntity);
 
         PersonEntity person = personRepository.save(personEntity);
 
-        return mapEntityToDto(person);
+        return personMapper.mapEntityToDto(person);
     }
 
     public String deletePersonById(long id) throws PersonNotFoundException {
@@ -86,45 +86,6 @@ public class PersonService {
 
     public List<PersonEntity> getPersonsByUniId(Long id) {
         return personRepository.findPersonEntitiesByUniversitiesId(id);
-    }
-
-    private void mapDtoToEntity(PersonDto personDto, PersonEntity personEntity) {
-        personEntity.setFirstName(personDto.getFirstName());
-        personEntity.setLastName(personDto.getFirstName());
-        personEntity.setUsername(personDto.getUsername());
-        personEntity.setPassword(personDto.getPassword());
-        personEntity.setFaculty(personDto.getFaculty());
-        personEntity.setBirthDate(personDto.getBirthDate());
-        personEntity.setAge(personDto.getAge());
-        personEntity.setGender(personDto.getGender());
-
-        personDto.getUniversities().forEach(uni -> {
-            UniversityEntity university = universityRepository.findByName(uni);
-            if (null == university) {
-                university = new UniversityEntity();
-            }
-            university.setName(uni);
-            personEntity.addUniversity(university);
-        });
-    }
-
-    private PersonDto mapEntityToDto(PersonEntity personEntity) {
-        PersonDto personDto = new PersonDto();
-
-        personDto.setFirstName(personEntity.getFirstName());
-        personDto.setLastName(personEntity.getLastName());
-        personDto.setUsername(personEntity.getUsername());
-        personDto.setPassword(personEntity.getPassword());
-        personDto.setFaculty(personEntity.getFaculty());
-        personDto.setBirthDate(personEntity.getBirthDate());
-        personDto.setAge(personEntity.getAge());
-        personDto.setGender(personEntity.getGender());
-
-        personDto.setUniversities(personEntity.getUniversities()
-                .stream().map(UniversityEntity::getName)
-                .collect(Collectors.toSet()));
-
-        return personDto;
     }
 
 }
